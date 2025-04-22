@@ -491,3 +491,34 @@ services:
       - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
 
   {%- endif %}
+
+  {%- if cookiecutter.use_ecommerce == 'y' %}  
+  ecommerce:
+    image: ecommerce:latest
+    container_name: ecommerce
+    env_file:
+      - .env
+    command: sh -c "python manage.py collectstatic --noinput && gunicorn e_commerce.wsgi:application --bind 0.0.0.0:8000"
+ 
+    volumes:
+      - ./static_cdn:/django_ecommerce/e_commerce/static_cdn
+    expose:
+      - 8000
+    environment:
+      - DEBUG=False
+      - STRIPE_API_KEY=sk_test_51t..
+      - STRIPE_PUB_KEY=pk_test_51Ngoe.. 
+      - REDIS_URL=redis://redis:6379?password=${REDIS_PASSWORD}
+      - ALLOWED_HOSTS={{ cookiecutter.domain }}
+      - DATABASE_URL=postgres://!!!SET POSTGRES_USER!!!:!!!SET POSTGRES_PASSWORD!!!@postgres:5432/web_app
+    depends_on:
+      - postgres
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ecommerce.rule=Host(`{{ cookiecutter.domain }}`)"
+      - "traefik.http.services.ecommerce.loadbalancer.server.port=8000" 
+      - "traefik.http.routers.ecommerce.tls.certresolver=letsencrypt"
+    networks:
+      - traefik-public   
+      - default
