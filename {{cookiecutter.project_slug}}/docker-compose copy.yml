@@ -30,9 +30,6 @@ volumes:
   {%- if cookiecutter.use_botpress == 'y' %}
   botpress_data:
   {%- endif %}
-  {%- if cookiecutter.use_keycloak == 'y' %}
-  keycloak_data:
-  {%- endif %}
 
 
 
@@ -447,47 +444,3 @@ services:
 
 
 
-  {%- if cookiecutter.use_exporter_redis == 'y' %}  
-
-  redis_exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: redis_exporter
-    environment:
-      REDIS_ADDR: "redis:6379" 
-      REDIS_PASSWORD: ${REDIS_PASSWORD}" 
-    ports:
-      - "9121:9121" 
-  
-  {%- endif %}
-
-
-  {%- if cookiecutter.use_keycloak == 'y' %}  
-
-  keycloak:
-    image:  quay.io/keycloak/keycloak:25.0.1
-    container_name: keycloak
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=!!!SET MASTER_ADMIN_PASSWORD!!!
-      - KC_HOSTNAME=accounts.{{ cookiecutter.domain }}
-      - KC_PROXY=edge
-      - KC_LOG_LEVEL=info
-      - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
-      - KC_DB_USERNAME=!!!SET POSTGRES_USER!!!
-      - KC_DB_PASSWORD=!!!SET POSTGRES_PASSWORD!!!
-    entrypoint: ["sh", "-c", "/opt/keycloak/bin/kc.sh start"]
-    networks:
-      - traefik-public
-      - default
-    volumes:
-      - keycloak_data:/opt/keycloak/data
-
-    labels:
-      - "traefik.enable=true"             
-      - "traefik.http.routers.keycloak.rule=Host(`accounts.{{ cookiecutter.domain }}`)"
-      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-      - "traefik.http.routers.keycloak.tls=true"
-      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
-
-  {%- endif %}

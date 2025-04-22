@@ -1,16 +1,18 @@
 {
-  "project_name": "My Company",
+  "project_name": "Alcateia",
   "project_slug": "{{ cookiecutter.project_name.lower()|replace(' ', '')|replace('-', '_')|replace('.', '_')|trim() }}",
-  "domain": "{{cookiecutter.project_slug}}.localhost",
+  "domain": "{{cookiecutter.project_slug}}.cloud",
   "use_portainer": "y",
   "use_traefik": "y",
   "expose_ports": "n",
   "use_letsencrypt": "y",
   "add_traefik_labels": "y",
-  "email_for_letsencrypt": "your@email.com",
+  "email_for_letsencrypt": "openpr23@gmail.com",
   "use_rocketchat": "y",
   "use_rocketconnect": "y",
   "use_rocketchat_metrics": "y",
   "use_wppconnect": "y",
-  "use_botpress": "y"
+  "use_botpress": "y",
+  "use_exporter_redis": "y",
+  "use_keycloak": "y"
 }

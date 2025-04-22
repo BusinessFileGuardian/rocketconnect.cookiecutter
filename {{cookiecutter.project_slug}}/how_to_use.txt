@@ -2,7 +2,10 @@
 #
 # INITIAL
 #
-
+glitter famished detention legged refusal   
+admin_io
+e37pb35W0Q178bix
+botpress =admin_bd
 MASTER ADMIN PASSWORD: admin / !!!SET MASTER_ADMIN_PASSWORD!!!
 
 # enter the project folder
