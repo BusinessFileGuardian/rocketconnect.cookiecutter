@@ -492,6 +492,7 @@ services:
 
   {%- endif %}
 
+
   {%- if cookiecutter.use_ecommerce == 'y' %}  
   ecommerce:
     image: ecommerce:latest
@@ -522,3 +523,4 @@ services:
     networks:
       - traefik-public   
       - default
+  {%- endif %}
