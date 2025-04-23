@@ -15,5 +15,7 @@
   "use_botpress": "y",
   "use_exporter_redis": "y",
   "use_keycloak": "y",
-  "use_ecommerce": "y"
+  "use_ecommerce": "y",
+  "use_vault": "y"
+  
 }

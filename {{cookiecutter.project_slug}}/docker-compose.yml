@@ -33,6 +33,11 @@ volumes:
   {%- if cookiecutter.use_keycloak == 'y' %}
   keycloak_data:
   {%- endif %}
+  {%- if cookiecutter.use_vault == 'y' %}
+  vault-config:
+  vault-data:
+  {%- endif %}
+
 
 
 
@@ -487,8 +492,12 @@ services:
       - "traefik.enable=true"             
       - "traefik.http.routers.keycloak.rule=Host(`accounts.{{ cookiecutter.domain }}`)"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-      - "traefik.http.routers.keycloak.tls=true"
-      - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+      {%- if cookiecutter.use_letsencrypt == 'y' %}    
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-keycloak.entrypoints=websecure"
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-keycloak.tls.certresolver=le"
+      {%- else %}
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-keycloak.entrypoints=web"
+      {%- endif %}
 
   {%- endif %}
 
@@ -519,8 +528,56 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ecommerce.rule=Host(`{{ cookiecutter.domain }}`)"
       - "traefik.http.services.ecommerce.loadbalancer.server.port=8000" 
-      - "traefik.http.routers.ecommerce.tls.certresolver=letsencrypt"
+      {%- if cookiecutter.use_letsencrypt == 'y' %}    
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-ecommerce.entrypoints=websecure"
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-ecommerce.tls.certresolver=le"
+      {%- else %}
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-ecommerce.entrypoints=web"
+      {%- endif %}
     networks:
       - traefik-public   
       - default
+  {%- endif %}
+
+  {%- if cookiecutter.use_vault == 'y' %} 
+  vault:
+    image: hashicorp/vault:1.15.3
+    container_name: vault
+    restart: always
+    volumes:
+        - ./vault/config:/vault/config
+        - vault-data:/vault/data
+        - ./vault/unseal.sh:/vault/unseal.sh
+    environment:
+      VAULT_ADDR: vault.{{ cookiecutter.domain }}
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+
+    command: >
+        /bin/sh -c "
+        vault server -config=/vault/config/vault.hcl &
+        while ! vault status > /dev/null 2>&1; do
+          echo 'Aguardando o Vault inicializar...';
+          sleep 2;
+        done;
+        /bin/sh /vault/unseal.sh;
+        tail -f /dev/null
+        "
+    networks:
+      - traefik-public
+      - default
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`vault.{{ cookiecutter.domain }}`)"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
+      - "traefik.http.services.vault.loadbalancer.server.scheme=http" 
+      {%- if cookiecutter.use_letsencrypt == 'y' %}    
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-vault.entrypoints=websecure"
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-vault.tls.certresolver=le"
+      {%- else %}
+      - "traefik.http.routers.{{ cookiecutter.project_slug }}-vault.entrypoints=web"
+      {%- endif %}   
   {%- endif %}
