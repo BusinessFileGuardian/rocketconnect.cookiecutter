@@ -581,3 +581,7 @@ services:
       - "traefik.http.routers.{{ cookiecutter.project_slug }}-vault.entrypoints=web"
       {%- endif %}   
   {%- endif %}
+
+
+
+#container de test => docker run -it --rm --network=traefik-public curlimages/curl
